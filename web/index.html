@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORBIT PaaS - Control Plane</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(18, 25, 41, 0.75);
+      --card-border: #1e293b;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #818cf8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.10) 0px, transparent 50%);
+      color: var(--text);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #090d16;
+      font-size: 1.15rem;
+    }
+
+    .brand h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1160px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .hero {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .hero h2 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 0.75rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-label {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-input {
+      background: rgba(11, 15, 23, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: var(--mono);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: var(--primary);
+      color: #090d16;
+      font-weight: 700;
+      font-size: 0.875rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+
+    .pipeline-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .pipeline-step {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.6rem;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+
+    .pipeline-step.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+
+    .pipeline-step.done {
+      background: rgba(52, 211, 153, 0.15);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .pipeline-step.failed {
+      background: rgba(248, 113, 113, 0.15);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .console-box {
+      background: #06090e;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-family: var(--mono);
+      font-size: 0.825rem;
+      color: #cbd5e1;
+      height: 180px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.85rem;
+    }
+
+    .meta-row:last-child {
+      border-bottom: none;
+    }
+
+    .meta-label {
+      color: var(--text-muted);
+    }
+
+    .meta-val {
+      font-family: var(--mono);
+      color: var(--primary);
+    }
+
+    .endpoint-card {
+      background: rgba(52, 211, 153, 0.08);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .endpoint-url {
+      font-family: var(--mono);
+      color: var(--success);
+      font-size: 0.875rem;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    td {
+      font-family: var(--mono);
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--card-border);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-logo">O</div>
+      <div>
+        <h1>ORBIT PaaS</h1>
+      </div>
+    </div>
+    <div class="badge" id="system-badge">
+      <span class="badge-dot"></span>
+      <span id="system-badge-text">Engine Ready</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2>Self-Hosted Git PaaS for AWS</h2>
+      <p>Automated cloud application delivery engine: Git source validation &bull; AWS CodeBuild &bull; ECR registry &bull; EKS zero-downtime rolling deployments.</p>
+    </section>
+
+    <div class="grid">
+      <!-- 1. DEPLOY FORM -->
+      <div class="card">
+        <div class="card-title">
+          <span>Deploy Flask Application</span>
+          <span style="font-size: 0.75rem; color: var(--primary);" id="pipeline-id-tag">ID: -</span>
+        </div>
+
+        <form id="deploy-form" onsubmit="submitDeployment(event)">
+          <div class="form-group">
+            <label class="form-label">Git Repository URL (HTTPS)</label>
+            <input type="text" class="form-input" id="input-repo-url" value="https://github.com/sipun-oops/orbit-test-app.git" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Application Name (RFC 1123)</label>
+            <input type="text" class="form-input" id="input-app-name" value="orbit-sample-flask" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group">
+              <label class="form-label">Version / Tag</label>
+              <input type="text" class="form-input" id="input-image-tag" value="1.0.0" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">K8s Replicas</label>
+              <input type="number" class="form-input" id="input-replicas" value="2" min="1" max="10" required>
+            </div>
+          </div>
+
+          <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn" id="deploy-btn" style="flex: 1;">
+              <span>Deploy Application</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="bumpVersion()" title="Bump version to demonstrate rolling update">
+              <span>+ Version</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 2. PIPELINE PROGRESS TRACKER -->
+      <div class="card">
+        <div class="card-title">
+          <span>Deployment Pipeline Status</span>
+          <span class="badge" id="current-status-badge">IDLE</span>
+        </div>
+
+        <div class="pipeline-bar">
+          <div class="pipeline-step" id="step-pending">1. PENDING</div>
+          <div class="pipeline-step" id="step-building">2. BUILDING</div>
+          <div class="pipeline-step" id="step-deploying">3. DEPLOYING</div>
+          <div class="pipeline-step" id="step-running">4. RUNNING</div>
+        </div>
+
+        <div id="endpoint-container" style="display: none;">
+          <div class="endpoint-card">
+            <div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Application Live Endpoint</div>
+              <div class="endpoint-url" id="app-endpoint-url">-</div>
+            </div>
+            <a href="#" target="_blank" id="endpoint-link" class="btn" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">Open App &rarr;</a>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="form-label">Deployment Logs & Events</label>
+            <span style="font-size: 0.75rem; color: var(--text-muted);" id="logs-time">-</span>
+          </div>
+          <div class="console-box" id="pipeline-logs">[ORBIT MVP] Control plane active. Ready to trigger deployment.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. DEPLOYMENT HISTORY -->
+    <div class="card">
+      <div class="card-title">
+        <span>Recent Deployments</span>
+        <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="loadDeployments()">Refresh</button>
+      </div>
+      <div style="overflow-x: auto;">
+        <table id="deployments-table">
+          <thead>
+            <tr>
+              <th>Job ID</th>
+              <th>App Name</th>
+              <th>Version Tag</th>
+              <th>Status</th>
+              <th>Replicas</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="deployments-body">
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted);">No deployments yet. Submit a deployment above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    ORBIT PaaS &bull; Milestone 5: Full Git-to-Kubernetes Orchestration
+  </footer>
+
+  <script>
+    let activePollInterval = null;
+    let currentJobId = null;
+
+    function appendLog(msg) {
+      const consoleEl = document.getElementById('pipeline-logs');
+      const time = new Date().toLocaleTimeString();
+      consoleEl.textContent += `\n[${time}] ${msg}`;
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+      document.getElementById('logs-time').textContent = time;
+    }
+
+    function bumpVersion() {
+      const tagInput = document.getElementById('input-image-tag');
+      const current = tagInput.value.trim();
+      const parts = current.split('.');
+      if (parts.length === 3) {
+        const patch = parseInt(parts[2], 10);
+        if (!isNaN(patch)) {
+          tagInput.value = `${parts[0]}.${parts[1]}.${patch + 1}`;
+          appendLog(`Version incremented to ${tagInput.value} for rolling update demo.`);
+          return;
+        }
+      }
+      tagInput.value = current + ".1";
+    }
+
+    function setPipelineSteps(status) {
+      const steps = ['pending', 'building', 'deploying', 'running'];
+      steps.forEach(s => {
+        const el = document.getElementById(`step-${s}`);
+        el.className = 'pipeline-step';
+      });
+
+      const badge = document.getElementById('current-status-badge');
+      badge.textContent = status;
+
+      if (status === 'PENDING') {
+        document.getElementById('step-pending').classList.add('active');
+        badge.style.color = '#fbbf24';
+      } else if (status === 'BUILDING') {
+        document.getElementById('step-pending').classList.add('done');
+        document.getElementById('step-building').classList.add('active');
+        badge.style.color = '#38bdf8';
+      } else if (status === 'DEPLOYING') {
+        document.getElementById('step-pending').classList.add('done');
+        document.getElementById('step-building').classList.add('done');
+        document.getElementById('step-deploying').classList.add('active');
+        badge.style.color = '#818cf8';
+      } else if (status === 'RUNNING') {
+        steps.forEach(s => document.getElementById(`step-${s}`).classList.add('done'));
+        badge.style.color = '#34d399';
+      } else if (status === 'FAILED') {
+        badge.style.color = '#f87171';
+        document.getElementById('step-pending').classList.add('failed');
+      }
+    }
+
+    async function submitDeployment(e) {
+      e.preventDefault();
+      const repoUrl = document.getElementById('input-repo-url').value.trim();
+      const appName = document.getElementById('input-app-name').value.trim();
+      const imageTag = document.getElementById('input-image-tag').value.trim();
+      const replicas = parseInt(document.getElementById('input-replicas').value, 10);
+      const btn = document.getElementById('deploy-btn');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Triggering...</span>';
+      appendLog(`Submitting deployment request for ${appName} (tag: ${imageTag})...`);
+
+      try {
+        const res = await fetch('/api/pipeline/deploy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            repo_url: repoUrl,
+            app_name: appName,
+            image_tag: imageTag,
+            replicas: replicas
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        currentJobId = data.id;
+        document.getElementById('pipeline-id-tag').textContent = `ID: ${currentJobId}`;
+        appendLog(`Pipeline job registered: ${currentJobId}`);
+        setPipelineSteps(data.status);
+
+        // Start polling
+        if (activePollInterval) clearInterval(activePollInterval);
+        activePollInterval = setInterval(() => pollJobStatus(currentJobId), 3000);
+      } catch (err) {
+        appendLog(`Deployment submission failed: ${err.message}`);
+        setPipelineSteps('FAILED');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Deploy Application</span>';
+      }
+    }
+
+    async function pollJobStatus(jobId) {
+      try {
+        const res = await fetch(`/api/pipeline/status?id=${encodeURIComponent(jobId)}`);
+        if (!res.ok) return;
+        const job = await res.json();
+
+        setPipelineSteps(job.status);
+        if (job.message) {
+          appendLog(job.message);
+        }
+
+        if (job.endpoint_url) {
+          const container = document.getElementById('endpoint-container');
+          const urlEl = document.getElementById('app-endpoint-url');
+          const linkEl = document.getElementById('endpoint-link');
+          urlEl.textContent = job.endpoint_url;
+          linkEl.href = job.endpoint_url;
+          container.style.display = 'block';
+        }
+
+        if (job.status === 'RUNNING' || job.status === 'FAILED') {
+          clearInterval(activePollInterval);
+          activePollInterval = null;
+          loadDeployments();
+        }
+      } catch (err) {
+        console.error('Error polling status:', err);
+      }
+    }
+
+    async function loadDeployments() {
+      try {
+        const res = await fetch('/api/pipeline/list');
+        if (!res.ok) return;
+        const jobs = await res.json();
+        const tbody = document.getElementById('deployments-body');
+        if (!jobs || jobs.length === 0) return;
+
+        tbody.innerHTML = '';
+        jobs.forEach(j => {
+          const tr = document.createElement('tr');
+          const time = new Date(j.created_at).toLocaleTimeString();
+          const color = j.status === 'RUNNING' ? '#34d399' : (j.status === 'FAILED' ? '#f87171' : '#38bdf8');
+          tr.innerHTML = `
+            <td>${j.id}</td>
+            <td><strong>${j.app_name}</strong></td>
+            <td>${j.image_tag}</td>
+            <td style="color: ${color}; font-weight: bold;">${j.status}</td>
+            <td>${j.replicas}</td>
+            <td>${time}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error('Error loading deployments:', err);
+      }
+    }
+
+    // Initial load
+    loadDeployments();
+  </script>
+</body>
+</html>
